@@ -1558,21 +1558,20 @@ class TextStringBuilderTest {
         sb.minimizeCapacity();
         assertEquals(0, sb.capacity());
 
-        // 1GiB char[] buffer: length is roughly 1/4 the maximum array size
-        final char[] chars = new char[1 << 29];
-
         // With infinite memory it should be possible to add this 3 times.
         try {
+            // 1GiB char[] buffer: length is roughly 1/4 the maximum array size.
+            final char[] chars = new char[1 << 29];
             for (int i = 0; i < 3; i++) {
                 sb.append(chars);
             }
+
+            // Now at 3/4 of the maximum array length.
+            // Adding is not possible so we expect an OOM error.
+            assertThrows(OutOfMemoryError.class, () -> sb.append(chars));
         } catch (final OutOfMemoryError ignored) {
             Assumptions.abort("Not enough memory for the test");
         }
-
-        // Now at 3/4 of the maximum array length.
-        // Adding is not possible so we expect an OOM error.
-        assertThrows(OutOfMemoryError.class, () -> sb.append(chars));
     }
 
     @Test
